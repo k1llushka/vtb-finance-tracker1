@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход - ВТБ Финансовый Трекер{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+        <div class="col-md-5">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <i class="bi bi-bank2" style="font-size: 4rem; color: var(--vtb-blue);"></i>
+                        </div>
+                        <h2 class="fw-bold" style="color: var(--vtb-dark-blue);">Добро пожаловать</h2>
+                        <p class="text-muted">Войдите в свой аккаунт</p>
+                    </div>
+
+                    <form method="post" action="{% url 'accounts:login' %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-person"></i> Имя пользователя
+                            </label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-lock"></i> Пароль
+                            </label>
+                            {{ form.password }}
+                            {% if form.password.errors %}
+                                <div class="text-danger small mt-1">{{ form.password.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">
+                                Запомнить меня
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-vtb w-100 mb-3">
+                            <i class="bi bi-box-arrow-in-right"></i> Войти
+                        </button>
+
+                        <div class="text-center">
+                            <p class="mb-0">Нет аккаунта? 
+                                <a href="{% url 'accounts:register' %}" class="text-decoration-none fw-semibold" style="color: var(--vtb-blue);">
+                                    Зарегистрироваться
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Преимущества -->
+            <div class="row mt-4 text-center">
+                <div class="col-4">
+                    <i class="bi bi-shield-check" style="font-size: 2rem; color: var(--vtb-green);"></i>
+                    <p class="small mt-2 text-muted">Безопасно</p>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-graph-up-arrow" style="font-size: 2rem; color: var(--vtb-blue);"></i>
+                    <p class="small mt-2 text-muted">Аналитика</p>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-robot" style="font-size: 2rem; color: var(--vtb-purple);"></i>
+                    <p class="small mt-2 text-muted">AI-помощник</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
