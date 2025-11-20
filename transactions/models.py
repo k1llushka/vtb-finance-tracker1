@@ -52,11 +52,14 @@ class Category(models.Model):
 
 
 class Transaction(models.Model):
-    """Транзакции (доходы и расходы)"""
+    """Финансовые транзакции пользователя"""
+
+    TYPE_INCOME = 'income'
+    TYPE_EXPENSE = 'expense'
 
     TYPE_CHOICES = [
-        ('income', 'Доход'),
-        ('expense', 'Расход'),
+        (TYPE_INCOME, 'Доход'),
+        (TYPE_EXPENSE, 'Расход'),
     ]
 
     user = models.ForeignKey(
@@ -65,6 +68,7 @@ class Transaction(models.Model):
         related_name='transactions',
         verbose_name='Пользователь'
     )
+
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -72,15 +76,23 @@ class Transaction(models.Model):
         related_name='transactions',
         verbose_name='Категория'
     )
-    type = models.CharField('Тип', max_length=10, choices=TYPE_CHOICES)
+
+    type = models.CharField(
+        'Тип',
+        max_length=10,
+        choices=TYPE_CHOICES
+    )
+
     amount = models.DecimalField(
         'Сумма',
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.01'))]
     )
+
     description = models.TextField('Описание', blank=True)
     date = models.DateField('Дата')
+
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
 
@@ -90,7 +102,7 @@ class Transaction(models.Model):
         ordering = ['-date', '-created_at']
 
     def __str__(self):
-        return f"{self.get_type_display()} {self.amount} - {self.date}"
+        return f"{self.get_type_display()} {self.amount} — {self.date}"
 
 
 class Budget(models.Model):
@@ -108,13 +120,16 @@ class Budget(models.Model):
         related_name='budgets',
         verbose_name='Категория'
     )
+
     amount = models.DecimalField(
         'Лимит',
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.01'))]
     )
+
     month = models.DateField('Месяц')
+
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)
 
     class Meta:
@@ -124,4 +139,4 @@ class Budget(models.Model):
         ordering = ['-month']
 
     def __str__(self):
-        return f"{self.category.name} - {self.amount}"
+        return f"{self.category.name} — {self.amount}"

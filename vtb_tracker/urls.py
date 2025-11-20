@@ -8,6 +8,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('transactions/', include('transactions.urls')),  # ← Добавлено
+    path('cards/', include('cards.urls')),
+    path('analytics/', include('analytics.urls')),
+    path('dashboard/', include('dashboard.urls')),
     path('', RedirectView.as_view(url='/transactions/', permanent=False), name='home'),
 ]
 

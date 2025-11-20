@@ -1,41 +1,22 @@
 from django import forms
 from .models import Transaction, Category, Budget
 from datetime import date
+from .models import Transaction, Category
 
 
 class TransactionForm(forms.ModelForm):
-    """Форма для создания/редактирования транзакции"""
-
     class Meta:
         model = Transaction
         fields = ['type', 'category', 'amount', 'date', 'description']
-        widgets = {
-            'type': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
-            }),
-            'category': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
-            }),
-            'amount': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': '0.00',
-                'step': '0.01',
-                'min': '0.01',
-                'required': True
-            }),
-            'date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date',
-                'required': True
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Описание транзакции (необязательно)'
-            }),
-        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+        if user:
+            self.fields['category'].queryset = Category.objects.filter(user=user)
+        else:
+            self.fields['category'].queryset = Category.objects.none()
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)

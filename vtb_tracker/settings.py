@@ -2,10 +2,6 @@ import os
 from pathlib import Path
 from decouple import config
 
-# В начале файла, после импортов
-ASGI_APPLICATION = 'vtb_tracker.asgi.application'
-WSGI_APPLICATION = 'vtb_tracker.wsgi.application'
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='your-secret-key-here')
@@ -22,10 +18,16 @@ INSTALLED_APPS = [
 
     # Third party
     'rest_framework',
+    'corsheaders',
+    'crispy_forms',
+    'crispy_bootstrap5',
 
     # Local apps
     'accounts',
     'transactions',
+    'cards',
+    'analytics',
+    'dashboard',
 ]
 
 MIDDLEWARE = [
@@ -51,22 +53,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-ASGI_APPLICATION = 'vtb_tracker.asgi.application'
-WSGI_APPLICATION = 'vtb_tracker.wsgi.application'
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
+@@ -70,49 +73,46 @@ DATABASES = {
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -91,9 +78,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
-
-# Custom User Model
-AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Настройки аутентификации
 AUTH_USER_MODEL = 'accounts.User'
