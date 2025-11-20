@@ -20,6 +20,7 @@ class Card(models.Model):
         on_delete=models.CASCADE,
         related_name='cards'
     )
+
     card_number = models.CharField(
         max_length=19,
         unique=True,
@@ -43,7 +44,6 @@ class Card(models.Model):
         default='mir',
         verbose_name='Платежная система'
     )
-
     bank_name = models.CharField(
         max_length=100,
         default='VTB',
@@ -58,7 +58,6 @@ class Card(models.Model):
     )
 
     expiry_date = models.DateField(verbose_name='Срок действия')
-
     cvv = models.CharField(max_length=3, verbose_name='CVV', blank=True)
 
     description = models.TextField(

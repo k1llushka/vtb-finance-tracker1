@@ -1,6 +1,13 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from .views import (
+    LoginView,
+    RegisterView,
+    ProfileView,
+    ProfileEditView,
+    ProfileSettingsUpdateView,   # ← обязательно
+)
 
 app_name = 'accounts'
 
@@ -31,4 +38,6 @@ urlpatterns = [
              template_name='accounts/password_change_done.html'
          ),
          name='password_change_done'),
+    path("profile/settings/", ProfileSettingsUpdateView.as_view(), name="profile_settings"),
+
 ]

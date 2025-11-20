@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold text-primary mb-4">История транзакций</h2>
+
+    <!-- Кнопка добавить -->
+    <div class="mb-3">
+        <a href="{% url 'transactions:add' %}" class="btn btn-primary">
+            + Добавить транзакцию
+        </a>
+    </div>
+
+    <!-- Если нет транзакций -->
+    {% if not transactions %}
+        <div class="alert alert-info mt-3">
+            Транзакций пока нет. Добавьте первую!
+        </div>
+    {% else %}
+
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+
+                <table class="table mb-0 table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Дата</th>
+                            <th>Тип</th>
+                            <th>Категория</th>
+                            <th>Сумма</th>
+                            <th class="text-end">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {% for t in transactions %}
+                        <tr>
+                            <td>{{ t.date }}</td>
+
+                            <td>
+                                {% if t.type == 'income' %}
+                                    <span class="text-success fw-bold">Доход</span>
+                                {% else %}
+                                    <span class="text-danger fw-bold">Расход</span>
+                                {% endif %}
+                            </td>
+
+                            <td>{{ t.category.name }}</td>
+
+                            <td>
+                                {% if t.type == 'income' %}
+                                    <span class="text-success">+{{ t.amount }} ₽</span>
+                                {% else %}
+                                    <span class="text-danger">-{{ t.amount }} ₽</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-end">
+                                <a href="{% url 'transactions:edit' t.id %}" class="btn btn-sm btn-outline-primary">Изменить</a>
+                                <a href="{% url 'transactions:delete' t.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}

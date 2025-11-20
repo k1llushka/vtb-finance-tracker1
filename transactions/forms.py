@@ -1,7 +1,6 @@
 from django import forms
-from .models import Transaction, Category, Budget
 from datetime import date
-from .models import Transaction, Category
+from .models import Transaction, Category, Budget
 
 
 class TransactionForm(forms.ModelForm):
@@ -9,57 +8,47 @@ class TransactionForm(forms.ModelForm):
         model = Transaction
         fields = ['type', 'category', 'amount', 'date', 'description']
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop("user", None)
-        super().__init__(*args, **kwargs)
-
-        if user:
-            self.fields['category'].queryset = Category.objects.filter(user=user)
-        else:
-            self.fields['category'].queryset = Category.objects.none()
-
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        if user:
-            # Фильтруем категории по пользователю
-            self.fields['category'].queryset = Category.objects.filter(
-                user=user,
-                is_active=True
-            )
 
-        # Устанавливаем сегодняшнюю дату по умолчанию
+        # Categories queryset
+        qs = Category.objects.filter(user=user, is_active=True)
+
+        # Detect selected type (income/expense)
+        tx_type = None
+
+        if 'type' in self.data:
+            tx_type = self.data.get('type')
+        elif self.instance and self.instance.pk:
+            tx_type = self.instance.type
+
+        if tx_type in ('income', 'expense'):
+            qs = qs.filter(type=tx_type)
+
+        self.fields['category'].queryset = qs.order_by('name')
+
+        # Styling
+        for field in self.fields.values():
+            field.widget.attrs.update({"class": "form-control"})
+
+        self.fields['type'].widget.attrs["class"] = "form-select"
+        self.fields['category'].widget.attrs["class"] = "form-select"
+
+        # Default date
         if not self.instance.pk:
             self.fields['date'].initial = date.today()
 
 
 class CategoryForm(forms.ModelForm):
-    """Форма для создания/редактирования категории"""
-
     class Meta:
         model = Category
         fields = ['name', 'type', 'icon', 'color', 'description']
         widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Название категории',
-                'required': True
-            }),
-            'type': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
-            }),
-            'icon': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'color': forms.TextInput(attrs={
-                'class': 'form-control',
-                'type': 'color'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 2,
-                'placeholder': 'Описание (необязательно)'
-            }),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'type': forms.Select(attrs={'class': 'form-select'}),
+            'icon': forms.Select(attrs={'class': 'form-select'}),
+            'color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
 
 
@@ -68,7 +57,7 @@ class BudgetForm(forms.ModelForm):
 
     class Meta:
         model = Budget
-        fields = ['category', 'amount', 'month']
+        fields = ['category', 'amount', 'month']   # ← БЕЗ ЗАПЯТОЙ
         widgets = {
             'category': forms.Select(attrs={
                 'class': 'form-select',
@@ -91,50 +80,42 @@ class BudgetForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
-            # Только категории расходов
+            # только категории расходов текущего пользователя
             self.fields['category'].queryset = Category.objects.filter(
                 user=user,
                 type='expense',
                 is_active=True
             )
 
-
 class TransactionFilterForm(forms.Form):
-    """Форма для фильтрации транзакций"""
-
     type = forms.ChoiceField(
         label='Тип',
         choices=[('', 'Все')] + list(Transaction.TYPE_CHOICES),
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+
     category = forms.ModelChoiceField(
         label='Категория',
         queryset=Category.objects.none(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+
     date_from = forms.DateField(
-        label='С',
         required=False,
-        widget=forms.DateInput(attrs={
-            'class': 'form-control',
-            'type': 'date'
-        })
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
     )
     date_to = forms.DateField(
-        label='По',
         required=False,
-        widget=forms.DateInput(attrs={
-            'class': 'form-control',
-            'type': 'date'
-        })
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
     )
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+
         if user:
             self.fields['category'].queryset = Category.objects.filter(
-                user=user,
-                is_active=True
+                user=user, is_active=True
             )
+

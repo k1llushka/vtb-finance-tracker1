@@ -72,15 +72,26 @@ class ProfileEditView(View):
             return redirect('accounts:login')
 
         profile, created = UserProfile.objects.get_or_create(user=request.user)
+
         user_form = UserUpdateForm(request.POST, request.FILES, instance=request.user)
         profile_form = UserProfileForm(request.POST, instance=profile)
 
-        if user_form.is_valid() and profile_form.is_valid():
+        user_valid = user_form.is_valid()
+        profile_valid = profile_form.is_valid()
+
+        # Сохраняем независимо
+        if user_valid:
             user_form.save()
+
+        if profile_valid:
             profile_form.save()
-            messages.success(request, 'Профиль обновлен!')
+
+        # Если обе валидны — показываем сообщение
+        if user_valid and profile_valid:
+            messages.success(request, "Профиль обновлен!")
             return redirect('accounts:profile')
 
+        # Иначе показываем ошибки
         return render(request, self.template_name, {
             'user_form': user_form,
             'profile_form': profile_form
@@ -105,3 +116,21 @@ class DocumentsView(View):
         if not request.user.is_authenticated:
             return redirect('accounts:login')
         return render(request, self.template_name)
+
+class ProfileSettingsUpdateView(View):
+    """Отдельное сохранение настроек профиля (правая колонка)"""
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return redirect("accounts:login")
+
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+        profile_form = UserProfileForm(request.POST, instance=profile)
+
+        if profile_form.is_valid():
+            profile_form.save()
+            messages.success(request, "Настройки профиля сохранены!")
+        else:
+            messages.error(request, "Ошибка при сохранении настроек.")
+
+        return redirect("accounts:profile_edit")

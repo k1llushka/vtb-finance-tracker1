@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
 
 {% block content %}
 <div class="container py-4" style="max-width: 600px;">
@@ -8,37 +10,8 @@
     <form method="post" class="card shadow-sm p-4">
         {% csrf_token %}
 
-        <!-- Тип -->
-        <div class="mb-3">
-            <label class="form-label">Тип</label>
-            {{ form.type|add_class:"form-select" }}
-        </div>
+        {{ form|crispy }}
 
-        <!-- Категория -->
-        <div class="mb-3">
-            <label class="form-label">Категория</label>
-            {{ form.category|add_class:"form-select" }}
-        </div>
-
-        <!-- Сумма -->
-        <div class="mb-3">
-            <label class="form-label">Сумма</label>
-            {{ form.amount|add_class:"form-control" }}
-        </div>
-
-        <!-- Дата -->
-        <div class="mb-3">
-            <label class="form-label">Дата</label>
-            {{ form.date|add_class:"form-control" }}
-        </div>
-
-        <!-- Описание -->
-        <div class="mb-3">
-            <label class="form-label">Описание</label>
-            {{ form.description|add_class:"form-control" }}
-        </div>
-
-        <!-- Buttons -->
         <div class="d-flex gap-2 mt-3">
             <button type="submit" class="btn btn-primary px-4">Сохранить</button>
             <a href="{% url 'transactions:list' %}" class="btn btn-secondary px-4">Отмена</a>
