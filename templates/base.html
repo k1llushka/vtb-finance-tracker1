@@ -22,10 +22,13 @@
     <!-- Навигация -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'transactions:dashboard' %}">
-                <i class="bi bi-bank2 me-2"></i>
-                VTB Finance Tracker
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{% static 'images/ВТБлого1.png' %}"
+                     alt="logo"
+                     style="height: 28px; width: auto; margin-right: 8px;">
+                <span>финансовый трекер</span>
             </a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>

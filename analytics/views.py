@@ -7,11 +7,9 @@ from django.db.models import Sum
 from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
-
 from transactions.models import Transaction
 from .forms import BudgetForm
 from .models import Budget, AIRecommendation
-
 
 class AnalyticsView(LoginRequiredMixin, View):
     """Аналитика расходов и доходов"""
@@ -78,9 +76,10 @@ class AnalyticsView(LoginRequiredMixin, View):
         user = request.user
 
         # Период анализа
-        period = int(request.GET.get('period', '30'))
-        end_date = timezone.now().date()
-        start_date = end_date - timedelta(days=period)
+        period = request.GET.get('period', '30')
+        days = int(period)
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=days)
 
         # Транзакции за период
         transactions = Transaction.objects.filter(

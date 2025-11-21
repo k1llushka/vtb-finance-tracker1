@@ -1,6 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views, api_views
+from .views import (
+    CategoryListView,
+    CategoryCreateView,
+    CategoryDeleteView,
+)
 
 app_name = 'transactions'
 
@@ -18,6 +23,7 @@ urlpatterns = [
     path('add/', views.TransactionCreateView.as_view(), name='add'),
     path('<int:pk>/edit/', views.TransactionUpdateView.as_view(), name='edit'),
     path('<int:pk>/delete/', views.TransactionDeleteView.as_view(), name='delete'),
+    path("categories/<int:pk>/delete/", CategoryDeleteView.as_view(), name="category_delete"),
 
     # Категории
     path('categories/', views.CategoryListView.as_view(), name='category_list'),

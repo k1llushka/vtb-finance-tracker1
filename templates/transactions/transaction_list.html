@@ -42,11 +42,9 @@
                 <div class="card-body">
                     <div class="text-muted">Баланс</div>
                     <div class="h4 mb-0">
-                        {% with balance=total_income|default:0|add:-total_expense|default:0 %}
-                            <span class="{% if balance >= 0 %}text-primary{% else %}text-warning{% endif %}">
-                                {{ balance|floatformat:2 }} ₽
-                            </span>
-                        {% endwith %}
+                        <span class="{% if balance >= 0 %}text-primary{% else %}text-warning{% endif %}">
+                            {{ balance|floatformat:2 }} ₽
+                        </span>
                     </div>
                 </div>
             </div>

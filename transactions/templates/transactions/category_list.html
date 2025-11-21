@@ -45,7 +45,12 @@
                             <p class="small mb-2">{{ c.description }}</p>
                         {% endif %}
 
-                        <a href="#" class="btn btn-sm btn-outline-danger disabled">Удалить</a>
+                        <a href="{% url 'transactions:category_delete' c.id %}"
+                           class="btn btn-sm btn-outline-danger">
+                           Удалить
+                        </a>
+
+
 
                     </div>
                 </div>

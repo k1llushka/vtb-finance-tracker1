@@ -16,8 +16,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user
 
+        user = self.request.user
         today = datetime.now().date()
         first_day = today.replace(day=1)
 
@@ -29,28 +29,21 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         income = transactions.filter(type='income').aggregate(total=Sum('amount'))['total'] or Decimal('0')
         expense = transactions.filter(type='expense').aggregate(total=Sum('amount'))['total'] or Decimal('0')
-        balance = income - expense
 
-        recent_transactions = Transaction.objects.filter(user=user)[:10]
+        context['income'] = income
+        context['expense'] = expense
+        context['balance'] = income - expense
+        context['current_month'] = today.strftime('%B %Y')
 
-        top_expenses = Transaction.objects.filter(
+        context['recent_transactions'] = Transaction.objects.filter(user=user)[:10]
+
+        context['top_expenses'] = Transaction.objects.filter(
             user=user,
             type='expense',
             date__gte=first_day
         ).values(
             'category__name', 'category__icon', 'category__color'
-        ).annotate(
-            total=Sum('amount')
-        ).order_by('-total')[:5]
-
-        context.update({
-            'income': income,
-            'expense': expense,
-            'balance': balance,
-            'recent_transactions': recent_transactions,
-            'top_expenses': top_expenses,
-            'current_month': today.strftime('%B %Y'),
-        })
+        ).annotate(total=Sum('amount')).order_by('-total')[:5]
 
         return context
 
@@ -125,17 +118,10 @@ class TransactionUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class TransactionDeleteView(LoginRequiredMixin, DeleteView):
+class TransactionDeleteView(DeleteView):
     model = Transaction
     template_name = 'transactions/transaction_confirm_delete.html'
     success_url = reverse_lazy('transactions:list')
-
-    def get_queryset(self):
-        return Transaction.objects.filter(user=self.request.user)
-
-    def delete(self, request, *args, **kwargs):
-        messages.success(request, 'Транзакция успешно удалена!')
-        return super().delete(request, *args, **kwargs)
 
 
 class CategoryListView(LoginRequiredMixin, ListView):
@@ -157,3 +143,12 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
         form.instance.user = self.request.user
         messages.success(self.request, 'Категория успешно создана!')
         return super().form_valid(form)
+
+class CategoryDeleteView(DeleteView):
+    model = Category
+    template_name = "transactions/category_confirm_delete.html"
+    success_url = reverse_lazy("transactions:category_list")
+
+    def get_queryset(self):
+        # Чтобы пользователь видел только свои категории
+        return Category.objects.filter(user=self.request.user)
