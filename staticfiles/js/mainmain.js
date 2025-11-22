@@ -608,44 +608,39 @@ Charts.createCategoryChart = async function (canvasId) {
             currentCharts[canvasId].destroy();
         }
 
+        // Регистрируем плагин
         Chart.register(roundedDoughnut);
 
         const ctx = canvas.getContext('2d');
+
         currentCharts[canvasId] = new Chart(ctx, {
             type: "doughnut",
             plugins: [roundedDoughnut],
 
             data: {
                 labels: data.labels,
-                datasets: [
-                    {
-                        data: data.datasets[0].data,
-                        backgroundColor: data.datasets[0].backgroundColor,
-                        borderWidth: 0,
-                        spacing: 14,
-                        hoverOffset: 0
-                    }
-                ]
+                datasets: [{
+                    data: data.datasets[0].data,
+                    backgroundColor: data.datasets[0].backgroundColor,
+                    borderWidth: 0,
+                    spacing: 10,         // расстояние между сегментами
+                }]
             },
 
             options: {
-                cutout: "70%",
+                cutout: "60%",         // толщина пончика
                 responsive: true,
                 maintainAspectRatio: false,
-
-                animation: {
-                    animateRotate: true,
-                    duration: 1400
-                },
+                interaction: { mode: "nearest" },
 
                 plugins: {
                     legend: {
                         position: "right",
                         labels: {
                             usePointStyle: true,
-                            pointStyle: "circle",
-                            padding: 18,
-                            font: { size: 15 }
+                            pointStyle: "round",
+                            padding: 20,
+                            font: { size: 14 }
                         }
                     }
                 }
@@ -653,16 +648,10 @@ Charts.createCategoryChart = async function (canvasId) {
         });
 
     } catch (error) {
-        console.error("Ошибка диаграммы категорий:", error);
+        console.error("Ошибка построения диаграммы категорий:", error);
     }
 };
 
-
-document.addEventListener("DOMContentLoaded", () => {
-    if (document.getElementById('categoryChart')) {
-        Charts.createCategoryChart('categoryChart');
-    }
-});
 
 
 // Экспорт для использования в других скриптах

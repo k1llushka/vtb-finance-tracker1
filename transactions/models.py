@@ -102,7 +102,7 @@ class Transaction(models.Model):
         ordering = ['-date', '-created_at']
 
     def __str__(self):
-        return f"{self.get_type_display()} {self.amount} — {self.date}"
+        return f"{self.category} - {self.amount}"
 
 
 class Budget(models.Model):

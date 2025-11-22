@@ -11,41 +11,65 @@ from .forms import TransactionForm, CategoryForm, BudgetForm, TransactionFilterF
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
-    """Главная страница дашборда"""
     template_name = 'transactions/dashboard.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         user = self.request.user
+        period = self.request.GET.get("period", "month")
         today = datetime.now().date()
-        first_day = today.replace(day=1)
 
+        # Определяем период
+        if period == "week":
+            start_date = today - timedelta(days=today.weekday())
+            title = "Статистика за текущую неделю"
+        elif period == "year":
+            start_date = today.replace(month=1, day=1)
+            title = "Статистика за текущий год"
+        else:
+            start_date = today.replace(day=1)
+            title = "Статистика за текущий месяц"
+
+        # Транзакции за выбранный период
         transactions = Transaction.objects.filter(
             user=user,
-            date__gte=first_day,
+            date__gte=start_date,
             date__lte=today
         )
 
         income = transactions.filter(type='income').aggregate(total=Sum('amount'))['total'] or Decimal('0')
         expense = transactions.filter(type='expense').aggregate(total=Sum('amount'))['total'] or Decimal('0')
+        balance = income - expense
 
-        context['income'] = income
-        context['expense'] = expense
-        context['balance'] = income - expense
-        context['current_month'] = today.strftime('%B %Y')
+        # 🔥 Добавляем последние 10 транзакций (НЕ зависят от периода)
+        recent_transactions = Transaction.objects.filter(
+            user=user
+        ).order_by('-date')[:10]
 
-        context['recent_transactions'] = Transaction.objects.filter(user=user)[:10]
+        context.update({
+            'income': income,
+            'expense': expense,
+            'balance': balance,
+            'period': period,
+            'period_title': title,
+            'recent_transactions': recent_transactions,  # ← ВОТ ЭТОГО НЕ ХВАТАЛО
+        })
 
-        context['top_expenses'] = Transaction.objects.filter(
-            user=user,
-            type='expense',
-            date__gte=first_day
-        ).values(
-            'category__name', 'category__icon', 'category__color'
-        ).annotate(total=Sum('amount')).order_by('-total')[:5]
+        # Группировка расходов по категориям
+        category_data = (
+            Transaction.objects.filter(user=user, type="expense")
+            .values("category__name", "category__color")
+            .annotate(total=Sum("amount"))
+        )
+
+        context["chart_labels"] = [item["category__name"] for item in category_data]
+        context["chart_values"] = [float(item["total"]) for item in category_data]
+        context["chart_colors"] = [item["category__color"] or "#cccccc" for item in category_data]
 
         return context
+
+
 
 
 class TransactionListView(LoginRequiredMixin, ListView):
@@ -152,3 +176,4 @@ class CategoryDeleteView(DeleteView):
     def get_queryset(self):
         # Чтобы пользователь видел только свои категории
         return Category.objects.filter(user=self.request.user)
+

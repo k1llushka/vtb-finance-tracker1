@@ -118,3 +118,5 @@ CORS_ALLOWED_ORIGINS = _env_list(
     'CORS_ALLOWED_ORIGINS',
     default='http://localhost:3000,http://127.0.0.1:3000',
 )
+
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
