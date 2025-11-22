@@ -150,48 +150,141 @@ const API = {
 const Charts = {
     // Создать график расходов/доходов
     async createMonthlyChart(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) return;
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
 
-        try {
-            const data = await API.getChartData('monthly');
+    try {
+        const chartData = await API.getChartData("monthly");
 
-            if (currentCharts[canvasId]) {
-                currentCharts[canvasId].destroy();
+        if (currentCharts[canvasId]) {
+            currentCharts[canvasId].destroy();
+        }
+
+        const ctx = canvas.getContext("2d");
+
+        // === ГРАДИЕНТЫ ===
+        const incomeGradient = ctx.createLinearGradient(0, 0, 0, 300);
+        incomeGradient.addColorStop(0, "rgba(0, 178, 255, 0.8)");
+        incomeGradient.addColorStop(1, "rgba(0, 178, 255, 0.2)");
+
+        const expenseGradient = ctx.createLinearGradient(0, 0, 0, 300);
+        expenseGradient.addColorStop(0, "rgba(255, 82, 82, 0.8)");
+        expenseGradient.addColorStop(1, "rgba(255, 82, 82, 0.2)");
+
+        // === СВЕТЯЩАЯСЯ ТЕНЬ ===
+        const shadowPlugin = {
+            id: "glowShadow",
+            afterDatasetsDraw(chart) {
+                const { ctx } = chart;
+                chart.data.datasets.forEach((dataset, i) => {
+                    const meta = chart.getDatasetMeta(i);
+                    if (!meta.hidden) {
+                        ctx.save();
+                        ctx.shadowColor = dataset.borderColor;
+                        ctx.shadowBlur = 18;
+                        ctx.lineJoin = "round";
+                        ctx.lineCap = "round";
+                        ctx.strokeStyle = dataset.borderColor;
+                        ctx.lineWidth = 3;
+
+                        ctx.beginPath();
+                        meta.data.forEach((point, index) => {
+                            if (index === 0) ctx.moveTo(point.x, point.y);
+                            else ctx.lineTo(point.x, point.y);
+                        });
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                });
             }
+        };
 
-            const ctx = canvas.getContext('2d');
-            currentCharts[canvasId] = new Chart(ctx, {
-                type: 'line',
-                data: data,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Доходы и расходы по месяцам'
+        Chart.register(shadowPlugin);
+
+        currentCharts[canvasId] = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    {
+                        label: "Доходы",
+                        data: chartData.datasets[0].data,
+                        borderColor: "rgba(0, 140, 255, 1)",
+                        backgroundColor: incomeGradient,
+                        fill: true,
+                        tension: 0.35,        // плавная линия
+                        borderWidth: 3,
+                        pointBackgroundColor: "white",
+                        pointBorderColor: "rgba(0,140,255,1)",
+                        pointBorderWidth: 3,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                    },
+                    {
+                        label: "Расходы",
+                        data: chartData.datasets[1].data,
+                        borderColor: "rgba(255, 60, 60, 1)",
+                        backgroundColor: expenseGradient,
+                        fill: true,
+                        tension: 0.35,
+                        borderWidth: 3,
+                        pointBackgroundColor: "white",
+                        pointBorderColor: "rgba(255,60,60,1)",
+                        pointBorderWidth: 3,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            font: { size: 14 }
                         }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return Utils.formatMoney(value);
-                                }
+                    tooltip: {
+                        backgroundColor: "rgba(0,0,0,0.7)",
+                        titleFont: { weight: "bold" },
+                        callbacks: {
+                            label: function(ctx) {
+                                return `${ctx.dataset.label}: ${Utils.formatMoney(ctx.raw)}`;
                             }
                         }
                     }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: "rgba(200,200,200,0.3)"
+                        },
+                        ticks: {
+                            callback: value => Utils.formatMoney(value)
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                },
+
+                // 🔥 Красивая анимация
+                animation: {
+                    duration: 2000,
+                    easing: "easeOutQuart"
                 }
-            });
-        } catch (error) {
-            console.error('Error creating monthly chart:', error);
-        }
-    },
+            }
+        });
+
+    } catch (error) {
+        console.error("Ошибка построения графика доходов/расходов:", error);
+    }
+},
 
     // Создать круговую диаграмму категорий
     async createCategoryChart(canvasId) {
@@ -199,22 +292,45 @@ const Charts = {
         if (!canvas) return;
 
         try {
-            const data = await API.getChartData('category');
+            const chartData = await API.getChartData('category');
 
             if (currentCharts[canvasId]) {
                 currentCharts[canvasId].destroy();
             }
 
+            const preparedData = {
+                labels: chartData.labels,
+                datasets: chartData.datasets.map(dataset => ({
+                    ...dataset,
+                    backgroundColor: dataset.backgroundColor?.length
+                        ? dataset.backgroundColor
+                        : dataset.data.map(() => '#6c757d'),
+                    borderColor: 'transparent',
+                    borderWidth: 0,
+                    borderRadius: 18,
+                    spacing: 6,
+                    hoverOffset: 10,
+                }))
+            };
+
             const ctx = canvas.getContext('2d');
             currentCharts[canvasId] = new Chart(ctx, {
                 type: 'doughnut',
-                data: data,
+                  data: preparedData,
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '55%',
                     plugins: {
                         legend: {
                             position: 'right',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                padding: 12,
+                            }
                         },
                         title: {
                             display: true,
@@ -597,65 +713,6 @@ const roundedDoughnut = {
     }
 };
 
-Charts.createCategoryChart = async function (canvasId) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-
-    try {
-        const data = await API.getChartData('category');
-
-        if (currentCharts[canvasId]) {
-            currentCharts[canvasId].destroy();
-        }
-
-        Chart.register(roundedDoughnut);
-
-        const ctx = canvas.getContext('2d');
-        currentCharts[canvasId] = new Chart(ctx, {
-            type: "doughnut",
-            plugins: [roundedDoughnut],
-
-            data: {
-                labels: data.labels,
-                datasets: [
-                    {
-                        data: data.datasets[0].data,
-                        backgroundColor: data.datasets[0].backgroundColor,
-                        borderWidth: 0,
-                        spacing: 14,
-                        hoverOffset: 0
-                    }
-                ]
-            },
-
-            options: {
-                cutout: "70%",
-                responsive: true,
-                maintainAspectRatio: false,
-
-                animation: {
-                    animateRotate: true,
-                    duration: 1400
-                },
-
-                plugins: {
-                    legend: {
-                        position: "right",
-                        labels: {
-                            usePointStyle: true,
-                            pointStyle: "circle",
-                            padding: 18,
-                            font: { size: 15 }
-                        }
-                    }
-                }
-            }
-        });
-
-    } catch (error) {
-        console.error("Ошибка диаграммы категорий:", error);
-    }
-};
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -663,6 +720,103 @@ document.addEventListener("DOMContentLoaded", () => {
         Charts.createCategoryChart('categoryChart');
     }
 });
+
+window.VTBTracker.AI.renderRecommendations = function (data) {
+    const container = document.getElementById("ai-recommendations");
+    container.innerHTML = "";
+
+    data.forEach(rec => {
+        container.innerHTML += `
+            <div class="ai-card">
+                <h4>${rec.title}</h4>
+                <p>${rec.text}</p>
+            </div>
+        `;
+    });
+};
+
+// ===================== AI CHAT =====================
+
+const chatButton = document.getElementById("ai-chat-button");
+const chatWindow = document.getElementById("ai-chat-window");
+const chatClose = document.getElementById("ai-chat-close");
+const chatInput = document.getElementById("ai-message-input");
+const chatSend = document.getElementById("ai-send-btn");
+const chatMessages = document.getElementById("ai-chat-messages");
+
+function addMessage(text, sender = "user") {
+    const msg = document.createElement("div");
+    msg.className = sender === "user" ? "msg-user" : "msg-ai";
+    msg.innerText = text;
+    chatMessages.appendChild(msg);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+chatButton.onclick = () => {
+    chatWindow.style.display = "flex";
+};
+chatClose.onclick = () => {
+    chatWindow.style.display = "none";
+};
+
+chatSend.onclick = sendMessage;
+chatInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") sendMessage();
+});
+
+function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    addMessage(text, "user");
+    chatInput.value = "";
+
+    // ---- Эмуляция ответа AI ----
+    setTimeout(() => {
+        addMessage("Это пример ответа AI. \n(Скоро подключим настоящий интеллект)", "ai");
+    }, 600);
+}
+
+async function sendAIMessage() {
+    const input = document.getElementById("chat-input");
+    const text = input.value.trim();
+    if (!text) return;
+
+    const chatWindow = document.getElementById("chat-window");
+
+    // показываем сообщение пользователя
+    chatWindow.innerHTML += `
+        <div class="text-end mb-2">
+            <span class="badge bg-primary p-2">${text}</span>
+        </div>
+    `;
+
+    input.value = "";
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+
+    // отправляем на сервер
+    const response = await fetch("/ai-chat/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": Utils.getCookie("csrftoken")
+        },
+        body: JSON.stringify({ message: text })
+    });
+
+    const data = await response.json();
+
+    // показываем ответ ИИ
+    chatWindow.innerHTML += `
+        <div class="text-start mb-2">
+            <span class="badge bg-light text-dark p-2 border">
+                ${data.response}
+            </span>
+        </div>
+    `;
+
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+}
 
 
 // Экспорт для использования в других скриптах

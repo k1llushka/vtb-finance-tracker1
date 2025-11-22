@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from .models import Transaction, Category, Budget
 from .forms import TransactionForm, CategoryForm, BudgetForm, TransactionFilterForm
-
+from analytics.models import AIRecommendation
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'transactions/dashboard.html'
@@ -67,9 +67,80 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context["chart_values"] = [float(item["total"]) for item in category_data]
         context["chart_colors"] = [item["category__color"] or "#cccccc" for item in category_data]
 
+        recommendations = self.generate_ai_recommendations(
+            user=user,
+            transactions=transactions,
+            income=income,
+            expense=expense
+        )
+
+        context["ai_recommendations"] = recommendations
+
         return context
 
+    def generate_ai_recommendations(self, user, transactions, income, expense):
+        recommendations = []
 
+        # 1. Превышение расходов над доходами
+        if expense > income:
+            recommendations.append(
+                f"Ваши расходы превышают доходы на {float(expense - income):.0f} ₽. Попробуйте пересмотреть траты."
+            )
+
+        # 2. Категория с максимальными расходами
+        top_cat = (
+            transactions.filter(type="expense")
+            .values("category__name")
+            .annotate(total=Sum("amount"))
+            .order_by("-total")
+            .first()
+        )
+        if top_cat:
+            recommendations.append(
+                f"Больше всего вы тратите на «{top_cat['category__name']}» — {float(top_cat['total']):.0f} ₽."
+            )
+
+        # 3. Быстрый рост расходов за неделю
+        week_ago = datetime.now().date() - timedelta(days=7)
+        week_expense = (
+                transactions.filter(type="expense", date__gte=week_ago)
+                .aggregate(total=Sum("amount"))["total"]
+                or 0
+        )
+
+        if week_expense > 0 and week_expense > (expense * Decimal("0.5")):
+            recommendations.append(
+                "Более 50% ваших расходов за период пришлись на последние 7 дней — расходы растут слишком быстро."
+            )
+
+        # 4. Средний чек
+        expenses_list = [
+            float(t.amount) for t in transactions.filter(type="expense")
+        ]
+        if expenses_list:
+            avg = sum(expenses_list) / len(expenses_list)
+            if avg > 3000:
+                recommendations.append(
+                    f"Средняя трата составляет {avg:.0f} ₽ — это довольно высоко. Попробуйте снизить количество крупных покупок."
+                )
+
+        # 5. Низкая диверсификация категорий
+        categories_count = (
+            transactions.filter(type="expense")
+            .values("category")
+            .distinct()
+            .count()
+        )
+        if categories_count == 1:
+            recommendations.append(
+                "Все ваши расходы сосредоточены в одной категории — это риск несбалансированности бюджета."
+            )
+
+        # 6. Если нет рекомендаций
+        if not recommendations:
+            recommendations.append("Отлично! Ваши траты выглядят сбалансировано 😊")
+
+        return recommendations
 
 
 class TransactionListView(LoginRequiredMixin, ListView):

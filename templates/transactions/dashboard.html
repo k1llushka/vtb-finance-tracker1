@@ -104,8 +104,11 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="monthlyChart" height="300"></canvas>
+                    <div class="chart-container-line">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
                 </div>
+
             </div>
         </div>
 
@@ -172,17 +175,33 @@
         <div class="col-lg-6 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-lightbulb me-2 text-warning"></i> AI рекомендации</h5>
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb me-2 text-warning"></i>
+                        AI рекомендации
+                    </h5>
                 </div>
+
                 <div class="card-body">
-                    <div id="recommendations-container">
-                        <div class="text-center py-3">
-                            <div class="spinner-border text-primary"></div>
+                    {% if ai_recommendations %}
+                        <ul class="list-group">
+                            {% for rec in ai_recommendations %}
+                                <li class="list-group-item d-flex align-items-start">
+                                    <i class="bi bi-stars text-warning me-2 mt-1"></i>
+                                    <span>{{ rec }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="p-3 text-muted text-center">
+                            Рекомендации недоступны
                         </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
+
+
+
 
     </div>
 

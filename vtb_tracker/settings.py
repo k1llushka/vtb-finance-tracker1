@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from decouple import config
 
@@ -20,7 +21,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'widget_tweaks',
-
 
     # Third party
     'rest_framework',
@@ -120,3 +120,5 @@ CORS_ALLOWED_ORIGINS = _env_list(
 )
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
