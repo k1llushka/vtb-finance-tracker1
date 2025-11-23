@@ -16,21 +16,28 @@ VTB Finance Tracker — веб‑приложение на Django для упр�
 ## Установка и запуск
 1. Клонируйте репозиторий и перейдите в каталог проекта:
    ```bash
-   cd vtb-finance-tracker1
    git clone https://github.com/k1llushka/vtb-finance-tracker1.git
+   cd vtb-finance-tracker1
    ```
 2. Создайте и активируйте виртуальное окружение (рекомендуется):
    ```bash
    python -m venv venv
-   source venv/bin/activate  # Windows: venv\\Scripts\\activate
+   source venv/bin/activate  # Windows: source venv/Scripts/activate
+
    ```
 3. Установите зависимости из фиксированного списка:
    ```bash
+   pip freeze > requirements.txt
    pip install -r requirements.txt
    ```
 4. Подготовьте файл окружения на основе примера и при необходимости измените значения:
    ```bash
-   cp .env.example .env
+   cat > .env << EOF
+   SECRET_KEY=some-secret-for-dev
+   DEBUG=True
+   ALLOWED_HOSTS=127.0.0.1,localhost
+   CORS_ALLOWED_ORIGINS=http://127.0.0.1:3000,http://localhost:3000
+   EOF
    ```
    Основные переменные окружения:
    - `SECRET_KEY` — секретный ключ Django
@@ -41,6 +48,8 @@ VTB Finance Tracker — веб‑приложение на Django для упр�
 ## База данных
 Примените миграции, чтобы создать локальную базу SQLite:
 ```bash
+python reset_db.py
+python manage.py makemigrations
 python manage.py migrate
 ```
 
