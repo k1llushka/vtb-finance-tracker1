@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}VTB Finance Tracker{% endblock %}</title>
+    <title>{% block title %}ВТБ Финансовый Трекер{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
@@ -53,6 +55,12 @@
                         <a class="nav-link" href="{% url 'transactions:category_list' %}">
                             <i class="bi bi-tags me-1"></i>
                             Категории
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'cards:list' %}">
+                            <i class="bi bi-credit-card me-1"></i>
+                            Карты
                         </a>
                     </li>
                 </ul>
@@ -113,7 +121,7 @@
 
     <footer class="footer-transparent text-center text-muted py-3 mt-5">
         <div class="container">
-            <p class="mb-0">© 2024 VTB Finance Tracker. Все права защищены.</p>
+            <p class="mb-0">© 2024 ВТБ Финансовый Трекер. Все права защищены.</p>
         </div>
     </footer>
 

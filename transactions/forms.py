@@ -1,42 +1,53 @@
 from django import forms
 from datetime import date
 from .models import Transaction, Category, Budget
+from cards.models import Card
+
 
 
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        fields = ['type', 'category', 'amount', 'date', 'description']
+        fields = ["type", "amount", "category", "card", "date", "description"]
 
-    def __init__(self, *args, user=None, **kwargs):
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user")  # <-- правильно забираем user ДО super()
         super().__init__(*args, **kwargs)
 
-        # Categories queryset
-        qs = Category.objects.filter(user=user, is_active=True)
+        # Фильтр карт пользователя
+        self.fields["card"].queryset = Card.objects.filter(user=user)
 
-        # Detect selected type (income/expense)
+        self.fields["card"].empty_label = "Наличными / Без карты"
+
+        # Фильтр категорий
+        categories = Category.objects.filter(user=user, is_active=True)
+
         tx_type = None
 
+        # Получаем выбранный тип транзакции
         if 'type' in self.data:
             tx_type = self.data.get('type')
         elif self.instance and self.instance.pk:
             tx_type = self.instance.type
 
+        # Фильтруем категории по типу (доход/расход)
         if tx_type in ('income', 'expense'):
-            qs = qs.filter(type=tx_type)
+            categories = categories.filter(type=tx_type)
 
-        self.fields['category'].queryset = qs.order_by('name')
+        self.fields["category"].queryset = categories.order_by("name")
 
-        # Styling
+        # Стилизация
         for field in self.fields.values():
             field.widget.attrs.update({"class": "form-control"})
 
-        self.fields['type'].widget.attrs["class"] = "form-select"
-        self.fields['category'].widget.attrs["class"] = "form-select"
+        self.fields["type"].widget.attrs["class"] = "form-select"
+        self.fields["category"].widget.attrs["class"] = "form-select"
+        self.fields["card"].widget.attrs["class"] = "form-select"
 
-        # Default date
+        # Дата по умолчанию
         if not self.instance.pk:
-            self.fields['date'].initial = date.today()
+            self.fields["date"].initial = date.today()
+
 
 
 class CategoryForm(forms.ModelForm):

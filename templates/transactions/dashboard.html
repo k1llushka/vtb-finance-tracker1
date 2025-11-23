@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Дашборд - VTB Finance Tracker{% endblock %}
+{% block title %}Дашборд - ВТБ Финансовый Трекер{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -17,11 +17,23 @@
         </div>
 
         <div class="col-md-4 text-end">
-            <a href="{% url 'transactions:add' %}" class="btn btn-primary btn-lg">
+            <a href="{% url 'transactions:add' %}{% if selected_card %}?card={{ selected_card.id }}{% endif %}"
+               class="btn btn-primary btn-lg">
                 <i class="bi bi-plus-circle me-2"></i>
                 Добавить транзакцию
             </a>
         </div>
+    </div>
+
+    <div class="col-12 mb-3">
+        <select id="cardFilter" class="form-select">
+            <option value="all">Все карты</option>
+            {% for card in cards %}
+                <option value="{{ card.id }}" {% if selected_card and card.id == selected_card.id %}selected{% endif %}>
+                    {{ card.bank_name }} — **** {{ card.card_number|slice:"-4:" }}
+                </option>
+            {% endfor %}
+        </select>
     </div>
 
     <!-- Статистика -->
@@ -200,9 +212,6 @@
             </div>
         </div>
 
-
-
-
     </div>
 
 </div>
@@ -224,8 +233,38 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.VTBTracker) {
         window.VTBTracker.AI.loadRecommendations();
         window.VTBTracker.AI.loadInsights();
-        window.VTBTracker.Charts.createMonthlyChart('monthlyChart');
+        // ===== Линейный график доходы/расходы =====
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels|safe }},
+                datasets: [{
+                    label: 'Расходы',
+                    data: {{ chart_values|safe }},
+                    borderWidth: 2,
+                    fill: false,
+                    borderColor: 'red',
+                    tension: 0.3
+                }]
+            },
+        });
     }
 });
+
+document.getElementById("cardFilter").addEventListener("change", function () {
+    const url = new URL(window.location.href);
+    const value = this.value;
+
+    if (value === "all") {
+        url.searchParams.delete("card");
+    } else {
+        url.searchParams.set("card", value);
+    }
+
+    window.location.href = url.toString();
+});
+
 </script>
+
 {% endblock %}

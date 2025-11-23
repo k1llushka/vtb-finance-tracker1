@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+from cards.models import Card
 
 
 class Category(models.Model):
@@ -88,6 +89,13 @@ class Transaction(models.Model):
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.01'))]
+    )
+    card = models.ForeignKey(
+        Card,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="transactions"
     )
 
     description = models.TextField('Описание', blank=True)
