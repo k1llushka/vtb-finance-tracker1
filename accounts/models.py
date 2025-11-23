@@ -54,7 +54,7 @@ class UserProfile(models.Model):
         default=False
     )
     ai_recommendations_enabled = models.BooleanField(
-        'AI рекомендации',
+        'Рекомендации',
         default=True
     )
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)

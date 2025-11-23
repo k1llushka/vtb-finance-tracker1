@@ -189,12 +189,12 @@ class UserProfileForm(forms.ModelForm):
             'currency': 'Валюта',
             'notification_enabled': 'Включить уведомления',
             'email_notifications': 'Email уведомления',
-            'ai_recommendations_enabled': 'AI рекомендации',
+            'ai_recommendations_enabled': 'Рекомендации',
         }
         help_texts = {
             'monthly_budget': 'Укажите планируемый месячный бюджет',
             'currency': 'Основная валюта для отображения',
             'notification_enabled': 'Получать уведомления о транзакциях',
             'email_notifications': 'Получать уведомления на email',
-            'ai_recommendations_enabled': 'Получать AI рекомендации по управлению финансами',
+            'ai_recommendations_enabled': 'Получать рекомендации по управлению финансами',
         }
