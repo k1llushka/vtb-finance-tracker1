@@ -59,7 +59,7 @@
                             <label class="form-label fw-semibold">
                                 <i class="bi bi-telephone"></i> Телефон
                             </label>
-                            {{ form.phone_number }}
+                            <input type="tel" name="phone_number" class="form-control" placeholder="+7 (999) 999-99-99" required>
                             {% if form.phone_number.errors %}
                                 <div class="text-danger small mt-1">{{ form.phone_number.errors }}</div>
                             {% endif %}
@@ -69,9 +69,9 @@
                             <label class="form-label fw-semibold">
                                 <i class="bi bi-lock"></i> Пароль
                             </label>
-                            {{ form.password }}
-                            {% if form.password.errors %}
-                                <div class="text-danger small mt-1">{{ form.password.errors }}</div>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}
+                                <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
                             {% endif %}
                         </div>
 
@@ -79,13 +79,13 @@
                             <label class="form-label fw-semibold">
                                 <i class="bi bi-lock-fill"></i> Подтверждение пароля
                             </label>
-                            {{ form.password_confirm }}
-                            {% if form.password_confirm.errors %}
-                                <div class="text-danger small mt-1">{{ form.password_confirm.errors }}</div>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                                <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
                             {% endif %}
                         </div>
 
-                        <button type="submit" class="btn btn-vtb w-100 mb-3">
+                         <button type="submit" class="btn btn-vtb w-100 mb-3">
                             <i class="bi bi-check-circle"></i> Зарегистрироваться
                         </button>
 

@@ -20,14 +20,6 @@
         </div>
     </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
 
     {% if object_list %}
         <div class="row g-4">
@@ -54,11 +46,6 @@
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item" href="{% url 'cards:card_detail' card.pk %}">
-                                                <i class="bi bi-eye me-2"></i>Просмотр
-                                            </a>
-                                        </li>
                                         <li>
                                             <a class="dropdown-item" href="{% url 'cards:card_update' card.pk %}">
                                                 <i class="bi bi-pencil me-2"></i>Редактировать
