@@ -3,7 +3,7 @@ from django.db import models
 
 
 class User(AbstractUser):
-    """Расширенная модель пользователя"""
+    """расширенная модель пользователя"""
     phone_number = models.CharField('Телефон', max_length=20, blank=True, null=True)
     address = models.TextField('Адрес', blank=True, null=True)
     avatar = models.ImageField('Аватар', upload_to='avatars/', blank=True, null=True)
@@ -19,7 +19,7 @@ class User(AbstractUser):
 
 
 class UserProfile(models.Model):
-    """Профиль пользователя"""
+    """профиль пользователя"""
 
     CURRENCY_CHOICES = [
         ('RUB', '₽ Рубль'),

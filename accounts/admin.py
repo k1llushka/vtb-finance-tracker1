@@ -4,7 +4,7 @@ from .models import User, UserProfile
 
 
 class UserProfileInline(admin.StackedInline):
-    """Инлайн для профиля пользователя"""
+    """онлайн для профиля пользователя"""
     model = UserProfile
     can_delete = False
     verbose_name_plural = 'Профиль'
@@ -13,7 +13,7 @@ class UserProfileInline(admin.StackedInline):
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    """Админка для пользователя"""
+    """админка для пользователя"""
     inlines = (UserProfileInline,)
 
     list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined']
@@ -35,7 +35,7 @@ class UserAdmin(BaseUserAdmin):
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    """Админка для профиля пользователя"""
+    """админка для профиля пользователя"""
     list_display = ['user', 'monthly_budget', 'currency', 'notification_enabled', 'created_at']
     list_filter = ['currency', 'notification_enabled', 'ai_recommendations_enabled']
     search_fields = ['user__username', 'user__email']

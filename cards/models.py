@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 
 class Card(models.Model):
-    """Банковские карты"""
+    """банковские карты"""
 
     CARD_TYPES = [
         ('debit', 'Дебетовая'),

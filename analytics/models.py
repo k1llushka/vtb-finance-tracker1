@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 class Budget(models.Model):
-    """Бюджеты по категориям"""
+    """бюджеты по категориям"""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -25,7 +25,7 @@ class Budget(models.Model):
 
 
 class AIRecommendation(models.Model):
-    """Рекомендации ИИ для пользователя"""
+    """рекомендации ИИ для пользователя"""
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

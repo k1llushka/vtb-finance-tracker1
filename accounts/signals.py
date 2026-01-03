@@ -4,13 +4,13 @@ from .models import User, UserProfile
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    """Создает профиль при создании нового пользователя"""
+    """создает профиль при создании нового пользователя"""
     if created:
         UserProfile.objects.create(user=instance)
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    """Сохраняет профиль при сохранении пользователя"""
+    """сохраняет профиль при сохранении пользователя"""
     if hasattr(instance, 'userprofile'):
         instance.userprofile.save()
     else:

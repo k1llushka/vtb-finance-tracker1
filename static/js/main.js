@@ -1,6 +1,4 @@
-/**
- * VTB Finance Tracker - Main JavaScript
- */
+
 
 // Глобальные переменные
 const API_BASE = '/transactions/api';

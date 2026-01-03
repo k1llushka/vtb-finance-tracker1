@@ -71,8 +71,6 @@ class RegisterForm(UserCreationForm):
             user.save()
         return user
 
-
-# ⛔ ЭТОТ КЛАСС ДОЛЖЕН БЫТЬ СДЕЛАН ОТДЕЛЬНО, НЕ ВНУТРИ RegisterForm
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User

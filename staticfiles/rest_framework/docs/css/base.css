@@ -7,15 +7,15 @@ h1 {
 }
 
 pre.highlight code * {
-  white-space: nowrap;    /* this sets all children inside to nowrap */
+  white-space: nowrap;
 }
 
 pre.highlight {
-  overflow-x: auto;       /* this sets the scrolling in x */
+  overflow-x: auto;
 }
 
 pre.highlight code {
-  white-space: pre;       /* forces <code> to respect <pre> formatting */
+  white-space: pre;
 }
 
 .main-container {
@@ -204,9 +204,6 @@ body {
     margin-top: 0;
 }
 
-
-/* @group Language Switcher */
-
 .sidebar .menu-list.menu-list-bottom {
     margin-bottom: 0;
     position: fixed;
@@ -222,11 +219,6 @@ body {
   margin-right: 20px;
   color: #d19b3d;
 }
-
-/* @end Language Switcher */
-
-
-/* @group Docs Content */
 
 .docs-content .meta .label {
     vertical-align: middle;
@@ -247,8 +239,6 @@ body {
 .code-samples pre {
   margin-top: 20px;
 }
-
-/* @end Docs Content */
 
 
 @media (max-width: 767px) {

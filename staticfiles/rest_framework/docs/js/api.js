@@ -11,7 +11,6 @@ function normalizeKeys (arr) {
 }
 
 function normalizeHTTPHeader (str) {
-  // Capitalize HTTP headers for display.
   return (str.charAt(0).toUpperCase() + str.substring(1))
     .replace(/-(.)/g, function ($1) {
       return $1.toUpperCase()
@@ -28,7 +27,6 @@ function normalizeHTTPHeader (str) {
 }
 
 function formEntries (form) {
-  // Polyfill for new FormData(form).entries()
   var formData = new FormData(form)
   if (formData.entries !== undefined) {
     return Array.from(formData.entries())
@@ -70,7 +68,6 @@ $(function () {
   var $authBasicModal = $('#auth_basic_modal')
   var $authSessionModal = $('#auth_session_modal')
 
-  // Language Control
   $('#language-control li').click(function (event) {
     event.preventDefault()
     var $languageMenuItem = $(this).find('a')
@@ -88,7 +85,6 @@ $(function () {
     $codeBlocks.filter('[data-language="' + language + '"]').removeClass('hide')
   })
 
-  // API Explorer
   $('form.api-interaction').submit(function (event) {
     event.preventDefault()
 
@@ -135,7 +131,6 @@ $(function () {
         try {
           params[paramKey] = JSON.parse(paramValue)
         } catch (err) {
-          // Ignore malformed JSON
         }
       } else if (dataType === 'string' && paramValue) {
         params[paramKey] = paramValue
@@ -143,7 +138,6 @@ $(function () {
     }
 
     $form.find(':checkbox').each(function (index) {
-      // Handle unselected checkboxes
       var name = $(this).attr('name')
       if (!params.hasOwnProperty(name)) {
         params[name] = false
@@ -151,7 +145,6 @@ $(function () {
     })
 
     function requestCallback (request) {
-      // Fill in the "GET /foo/" display.
       var parser = document.createElement('a')
       parser.href = request.url
       var method = request.options.method
@@ -162,10 +155,8 @@ $(function () {
     }
 
     function responseCallback (response, responseText) {
-      // Display the 'Data'/'Raw' control.
       $toggleView.removeClass('hide')
 
-      // Fill in the "200 OK" display.
       $responseStatusCode.removeClass('label-success').removeClass('label-danger')
       if (response.ok) {
         $responseStatusCode.addClass('label-success')
@@ -175,7 +166,6 @@ $(function () {
       $responseStatusCode.text(response.status)
       $meta.removeClass('hide')
 
-      // Fill in the Raw HTTP response display.
       var panelText = 'HTTP/1.1 ' + response.status + ' ' + response.statusText + '\n'
       response.headers.forEach(function (header, key) {
         panelText += normalizeHTTPHeader(key) + ': ' + header + '\n'
@@ -186,27 +176,22 @@ $(function () {
       $responseRawResponse.text(panelText)
     }
 
-    // Instantiate a client to make the outgoing request.
     var options = {
       requestCallback: requestCallback,
       responseCallback: responseCallback
     }
 
-    // Setup authentication options.
     if (window.auth && window.auth.type === 'token') {
-      // Header authentication
       options.auth = new coreapi.auth.TokenAuthentication({
         scheme: window.auth.scheme,
         token: window.auth.token
       })
     } else if (window.auth && window.auth.type === 'basic') {
-      // Basic authentication
       options.auth = new coreapi.auth.BasicAuthentication({
         username: window.auth.username,
         password: window.auth.password
       })
     } else if (window.auth && window.auth.type === 'session') {
-      // Session authentication
       options.auth = new coreapi.auth.SessionAuthentication({
         csrfCookieName: 'csrftoken',
         csrfHeaderName: 'X-CSRFToken'
@@ -239,7 +224,6 @@ $(function () {
     })
   })
 
-  // 'Data'/'Raw' control
   $('.toggle-view button').click(function () {
     var $modalContent = $(this).closest('.modal-content')
     var $modalResponseRaw = $modalContent.find('.response-raw')
@@ -258,7 +242,6 @@ $(function () {
     }
   })
 
-  // Authentication: none
   $authControl.find("[data-auth='none']").click(function (event) {
     event.preventDefault()
     window.auth = null
@@ -267,7 +250,6 @@ $(function () {
     $authControl.find("[data-auth='none']").closest('li').addClass('active')
   })
 
-  // Authentication: token
   $('form.authentication-token-form').submit(function (event) {
     event.preventDefault()
     var $form = $(this).closest('form')
@@ -284,7 +266,6 @@ $(function () {
     $authTokenModal.modal('hide')
   })
 
-  // Authentication: basic
   $('form.authentication-basic-form').submit(function (event) {
     event.preventDefault()
     var $form = $(this).closest('form')
@@ -301,7 +282,6 @@ $(function () {
     $authBasicModal.modal('hide')
   })
 
-  // Authentication: session
   $('form.authentication-session-form').submit(function (event) {
     event.preventDefault()
     window.auth = {

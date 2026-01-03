@@ -8,7 +8,7 @@ from accounts.models import User, UserProfile
 
 
 def create_profiles():
-    """Создает профили для всех пользователей без профиля"""
+    """создает профили для всех пользователей без профиля"""
     users_without_profile = User.objects.filter(userprofile__isnull=True)
 
     created_count = 0

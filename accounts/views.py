@@ -9,7 +9,7 @@ from .forms import RegisterForm, UserUpdateForm, UserProfileForm
 
 
 class LoginView(AuthLoginView):
-    """Вход в систему"""
+    """вход в систему"""
     template_name = 'accounts/login.html'
 
     def get_success_url(self):
@@ -18,7 +18,7 @@ class LoginView(AuthLoginView):
 
 
 class RegisterView(View):
-    """Регистрация"""
+    """регистрация"""
     template_name = 'accounts/register.html'
 
     def get(self, request):
@@ -36,7 +36,7 @@ class RegisterView(View):
 
 
 class ProfileView(View):
-    """Профиль пользователя"""
+    """профиль пользователя"""
     template_name = 'accounts/profile.html'
 
     def get(self, request):
@@ -51,7 +51,7 @@ class ProfileView(View):
 
 
 class ProfileEditView(View):
-    """Редактирование профиля"""
+    """редактирование профиля"""
     template_name = 'accounts/profile_edit.html'
 
     def get(self, request):
@@ -79,19 +79,19 @@ class ProfileEditView(View):
         user_valid = user_form.is_valid()
         profile_valid = profile_form.is_valid()
 
-        # Сохраняем независимо
+        # сохраняем независимо
         if user_valid:
             user_form.save()
 
         if profile_valid:
             profile_form.save()
 
-        # Если обе валидны — показываем сообщение
+        # если обе валидны — показываем сообщение
         if user_valid and profile_valid:
             messages.success(request, "Профиль обновлен!")
             return redirect('accounts:profile')
 
-        # Иначе показываем ошибки
+        # иначе показываем ошибки
         return render(request, self.template_name, {
             'user_form': user_form,
             'profile_form': profile_form
@@ -109,7 +109,7 @@ class ContactsView(View):
 
 
 class DocumentsView(View):
-    """Документы"""
+    """документы"""
     template_name = 'accounts/documents.html'
 
     def get(self, request):
@@ -118,7 +118,7 @@ class DocumentsView(View):
         return render(request, self.template_name)
 
 class ProfileSettingsUpdateView(View):
-    """Отдельное сохранение настроек профиля (правая колонка)"""
+    """отдельное сохранение настроек профиля (правая колонка)"""
 
     def post(self, request):
         if not request.user.is_authenticated:
