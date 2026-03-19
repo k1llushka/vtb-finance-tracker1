@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\kiluuu\vtb-finance-tracker1\venv"
+VIRTUAL_ENV="C:\Users\kasae\vtb-finance-tracker1\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

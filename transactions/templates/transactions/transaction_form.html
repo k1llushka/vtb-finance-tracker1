@@ -3,31 +3,48 @@
 {% block title %}{% if form.instance.pk %}Редактировать транзакцию{% else %}Новая транзакция{% endif %} - VTB Finance Tracker{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 720px;">
-    <div class="card shadow-sm">
+<div class="container transaction-form-page">
+    <div class="card shadow-sm transaction-shell">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">
+            <h3 class="mb-0 transaction-title">
                 {% if form.instance.pk %}
-                    <i class="bi bi-pencil-square me-2"></i> Редактировать транзакцию
+                    <i class="bi bi-pencil-square me-2"></i>Редактировать транзакцию
                 {% else %}
-                    <i class="bi bi-plus-circle me-2"></i> Новая транзакция
+                    <i class="bi bi-plus-circle me-2"></i>Новая транзакция
                 {% endif %}
-            </h5>
+            </h3>
             <a href="{% url 'transactions:list' %}" class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Назад
             </a>
         </div>
         <div class="card-body">
-            <form method="post" novalidate>
+            <form id="transaction-form" method="post" novalidate>
                 {% csrf_token %}
-                <div class="row g-3">
+                <div class="row g-3 align-items-start">
                     <div class="col-md-6">
                         <label class="form-label">Тип</label>
                         {{ form.type }}
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Категория</label>
-                        {{ form.category }}
+                        <label class="form-label d-flex justify-content-between align-items-center">
+                            <span>Категория</span>
+                            <button type="button" id="ai-categorize-btn" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-stars me-1"></i>AI подобрать
+                            </button>
+                        </label>
+                        <select name="category" id="id_category" class="form-select">
+                            <option value="">---------</option>
+                            {% for category in all_categories %}
+                                <option
+                                    value="{{ category.id }}"
+                                    data-type="{{ category.type }}"
+                                    {% if category.id|stringformat:"s" == form.data.category or category.id == form.instance.category_id %}selected{% endif %}
+                                >
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div id="ai-categorize-hint" class="form-text">Если выбран доход, в списке останется только зарплата. Для расходов будут показаны только расходные категории.</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Карта</label>
@@ -46,9 +63,10 @@
                         {{ form.description }}
                     </div>
                 </div>
+                <div id="ai-categorize-status" class="alert alert-light border mt-3 mb-0 d-none"></div>
                 <div class="mt-4 d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-1"></i> Сохранить
+                        <i class="bi bi-save me-1"></i>Сохранить
                     </button>
                     <a href="{% url 'transactions:list' %}" class="btn btn-outline-secondary">Отмена</a>
                 </div>
@@ -56,4 +74,6 @@
         </div>
     </div>
 </div>
+{{ income_category_ids|json_script:"income-category-ids" }}
+{{ expense_category_ids|json_script:"expense-category-ids" }}
 {% endblock %}

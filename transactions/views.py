@@ -6,8 +6,15 @@ from django.contrib import messages
 from django.db.models import Sum, Q
 from datetime import datetime, timedelta
 from decimal import Decimal
+from .ai_services import finance_ai_service
 from .models import Transaction, Category, Budget
-from .forms import TransactionForm, CategoryForm, BudgetForm, TransactionFilterForm
+from .forms import (
+    BudgetForm,
+    CategoryForm,
+    TransactionFilterForm,
+    TransactionForm,
+    get_categories_for_transaction_type,
+)
 from analytics.models import AIRecommendation
 from cards.models import Card
 
@@ -218,6 +225,21 @@ class TransactionCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
+        auto_category_name = None
+        if (
+            form.instance.type == Transaction.TYPE_EXPENSE
+            and not form.instance.category_id
+            and form.instance.description
+        ):
+            categorization = finance_ai_service.categorize_expense(
+                user=self.request.user,
+                description=form.instance.description,
+                amount=form.instance.amount,
+                tx_date=form.instance.date,
+            )
+            if categorization.should_apply:
+                form.instance.category_id = categorization.category_id
+                auto_category_name = categorization.category_name
         response = super().form_valid(form)
 
         card = form.instance.card
@@ -228,16 +250,31 @@ class TransactionCreateView(LoginRequiredMixin, CreateView):
                 card.balance -= form.instance.amount
             card.save()
 
+        if auto_category_name:
+            messages.info(self.request, f'AI определил категорию: {auto_category_name}.')
+
         return response
 
     def get_initial(self):
         initial = super().get_initial()
+        initial["type"] = Transaction.TYPE_EXPENSE
 
         card_id = self.request.GET.get("card")
         if card_id:
             initial["card"] = card_id
 
         return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        categories = Category.objects.filter(user=self.request.user, is_active=True).order_by("type", "name")
+        salary_categories = get_categories_for_transaction_type(self.request.user, Transaction.TYPE_INCOME)
+        context["all_categories"] = categories
+        context["income_category_ids"] = list(salary_categories.values_list("id", flat=True))
+        context["expense_category_ids"] = list(
+            get_categories_for_transaction_type(self.request.user, Transaction.TYPE_EXPENSE).values_list("id", flat=True)
+        )
+        return context
 
 
 class TransactionUpdateView(LoginRequiredMixin, UpdateView):
@@ -277,6 +314,17 @@ class TransactionUpdateView(LoginRequiredMixin, UpdateView):
             new_card.save()
 
         return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        categories = Category.objects.filter(user=self.request.user, is_active=True).order_by("type", "name")
+        salary_categories = get_categories_for_transaction_type(self.request.user, Transaction.TYPE_INCOME)
+        context["all_categories"] = categories
+        context["income_category_ids"] = list(salary_categories.values_list("id", flat=True))
+        context["expense_category_ids"] = list(
+            get_categories_for_transaction_type(self.request.user, Transaction.TYPE_EXPENSE).values_list("id", flat=True)
+        )
+        return context
 
 
 class TransactionDeleteView(DeleteView):

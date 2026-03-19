@@ -7,17 +7,12 @@ from django.views.generic import RedirectView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
-
-    # ВАЖНО: подключаем API namespace отдельно
+    path('ai/', include('transactions.ai_urls')),
     path('transactions/api/', include(('transactions.api_urls', 'api'), namespace='api')),
-
-    # Обычные web-урлы
     path('transactions/', include('transactions.urls')),
-
     path('cards/', include('cards.urls')),
     path('analytics/', include('analytics.urls')),
     path('dashboard/', include('dashboard.urls')),
-
     path('', RedirectView.as_view(url='/transactions/', permanent=False), name='home'),
 ]
 

@@ -122,3 +122,20 @@ CORS_ALLOWED_ORIGINS = _env_list(
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_FINANCE_MODEL = config("OPENAI_FINANCE_MODEL", default="gpt-5-mini")
+REDIS_URL = config("REDIS_URL", default="")
+
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "finance-tracker-ai",
+        }
+    }
